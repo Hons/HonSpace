@@ -25,6 +25,15 @@ public class GridMaker {
         
         grid.setPlace(0, 0, new Sun());
         grid.setPlace(2, 1, new Planet());
+        grid.setPlace(4, 0, new Planet());
+        grid.setPlace(4, 1, new Planet());
+        grid.setPlace(4, 2, new Planet());
+        grid.setPlace(4, 3, new Planet());
+        grid.setPlace(4, 4, new Planet());
+        grid.setPlace(4, 5, new Planet());
+        grid.setPlace(4, 6, new Planet());
+        grid.setPlace(4, 7, new Planet());
+        grid.setPlace(4, 8, new Planet());
         grid.setPlace(4, 9, new Planet());
         grid.setPlace(-1, -4, new Planet());
         grid.setPlace(-2, 4, new Planet());

@@ -3,6 +3,7 @@ package com.hons.honspace.solarsystem;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hons.honspace.solarsystem.places.FogOfWar;
 import com.hons.honspace.solarsystem.places.Place;
 
 public class Grid {
@@ -33,6 +34,25 @@ public class Grid {
 
     public List<Place> getAllPlaces() {
         return allPlaces;
+    }
+    
+    public Place[][] getSubGrid(int centerX, int centerY, int width) {
+        int maxVal = (2*width)+1;
+        Place[][] window = new Place[maxVal][maxVal];;
+        Place temp = null;
+        Place fog = new FogOfWar();
+        for(int i = 0; i < maxVal; i++){
+            for(int j = 0; j < maxVal; j++){
+                temp = places[convertCoordToGrid(i-width)][convertCoordToGrid(j-width)];
+                if(temp == null) {
+                    temp = fog;
+                }
+                window[i][j] = temp;
+            }
+        }
+        
+        return window;
+        
     }
 
     /*

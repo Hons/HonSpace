@@ -1,6 +1,6 @@
-#tile {
-	height: 100px;
-	width: 100px;
+.tile {
+	height: 50px;
+	width: 50px;
 }
 
 img {
