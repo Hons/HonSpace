@@ -3,10 +3,13 @@ package com.hons.honspace.solarsystem;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.hons.honspace.solarsystem.places.FogOfWar;
 import com.hons.honspace.solarsystem.places.Place;
 
 public class Grid {
+    public static final Logger logger = Logger.getLogger(Grid.class);
     public static final int MAX_DISTANCE = 50;
     
     private String name = "";
@@ -37,22 +40,23 @@ public class Grid {
     }
     
     public Place[][] getSubGrid(int centerX, int centerY, int width) {
+        logger.error(centerX + "::" + centerY + "::" + width);
         int maxVal = (2*width)+1;
         Place[][] window = new Place[maxVal][maxVal];;
         Place temp = null;
         Place fog = new FogOfWar();
+        
         for(int i = 0; i < maxVal; i++){
             for(int j = 0; j < maxVal; j++){
-                temp = places[convertCoordToGrid(i-width)][convertCoordToGrid(j-width)];
+                logger.error("Setting: " + i + "\t" + j + "\t" + convertCoordToGrid(i-width) + "\t" + convertCoordToGrid(j-width));
+                temp = places[convertCoordToGrid((centerX-width)+i)][convertCoordToGrid((centerY-width)+j)];
                 if(temp == null) {
                     temp = fog;
                 }
-                window[i][j] = temp;
+                window[maxVal-1-j][i] = temp;
             }
         }
-        
         return window;
-        
     }
 
     /*
