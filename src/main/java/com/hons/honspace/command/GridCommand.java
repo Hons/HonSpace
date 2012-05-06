@@ -7,6 +7,7 @@ import com.hons.honspace.solarsystem.places.Place;
 public class GridCommand {
 
     int id;
+    String name;
     private Place[][] places;
 
     public Place[][] getPlaces() {
@@ -23,5 +24,11 @@ public class GridCommand {
     public void setId(int id) {
         this.id = id;
     }
-    
+    public String getName() {
+        return name;
+    }
+    @XmlElement
+    public void setName(String name) {
+        this.name = name;
+    }
 }

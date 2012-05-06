@@ -13,6 +13,20 @@
 	text-align: center;
 }
 
+.z0 {
+	height: 50px;
+	width: 50px;
+	position: absolute;
+	z-index: 0;
+}
+
+.z1 {
+	height: 50px;
+	width: 50px;
+	position: absolute;
+	z-index: 1;
+}
+
 img {
 	vertical-align: middle;
 	height: 100%;

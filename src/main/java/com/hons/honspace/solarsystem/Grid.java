@@ -1,10 +1,11 @@
 package com.hons.honspace.solarsystem;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import com.hons.honspace.command.GridCommand;
 import com.hons.honspace.solarsystem.places.FogOfWar;
 import com.hons.honspace.solarsystem.places.Place;
 
@@ -12,9 +13,11 @@ public class Grid {
     public static final Logger logger = Logger.getLogger(Grid.class);
     public static final int MAX_DISTANCE = 50;
     
+    int id;
     private String name = "";
     private Place[][] places = new Place[MAX_DISTANCE*2+1][MAX_DISTANCE*2+1];
-    private List<Place> allPlaces = new ArrayList<Place>();
+    //This is kept as basically an index so you can directly reference a cell.
+    private HashMap<String,Place> allPlaces = new HashMap<String,Place>();
     
     public Grid(){
         
@@ -24,23 +27,24 @@ public class Grid {
         return places[convertCoordToGrid(x)][convertCoordToGrid(y)];
     }
     
-    protected void setPlace(int x, int y, Place place){
+    public void setPlace(int x, int y, Place place){
+        
         place.setX(x);
         place.setY(y);
         places[convertCoordToGrid(x)][convertCoordToGrid(y)] = place;
-        allPlaces.add(place);
+        allPlaces.put(coordsIndex(x,y), place);
     }
     
     public Place[][] getPlaces() {
         return places;
     }
 
-    public List<Place> getAllPlaces() {
-        return allPlaces;
+    public Collection<Place> getAllPlaces() {
+        return allPlaces.values();
     }
     
-    public Place[][] getSubGrid(int centerX, int centerY, int width) {
-        logger.error(centerX + "::" + centerY + "::" + width);
+    public GridCommand getSubGrid(int centerX, int centerY, int width) {
+        //logger.error(centerX + "::" + centerY + "::" + width);
         int maxVal = (2*width)+1;
         Place[][] window = new Place[maxVal][maxVal];;
         Place temp = null;
@@ -48,7 +52,7 @@ public class Grid {
         
         for(int i = 0; i < maxVal; i++){
             for(int j = 0; j < maxVal; j++){
-                logger.error("Setting: " + i + "\t" + j + "\t" + convertCoordToGrid(i-width) + "\t" + convertCoordToGrid(j-width));
+                //logger.error("Setting: " + i + "\t" + j + "\t" + convertCoordToGrid(i-width) + "\t" + convertCoordToGrid(j-width));
                 temp = places[convertCoordToGrid((centerX-width)+i)][convertCoordToGrid((centerY-width)+j)];
                 if(temp == null) {
                     temp = fog;
@@ -56,7 +60,12 @@ public class Grid {
                 window[maxVal-1-j][i] = temp;
             }
         }
-        return window;
+        GridCommand command = new GridCommand();
+        command.setId(id);
+        command.setName(name);
+        command.setPlaces(window);
+        
+        return command;
     }
 
     /*
@@ -68,5 +77,16 @@ public class Grid {
     private int convertCoordToGrid(int coord){
        return coord + MAX_DISTANCE; 
     }
+    
+    private String coordsIndex(int x, int y){
+        return x + "-" + y;
+    }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

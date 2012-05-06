@@ -7,6 +7,12 @@
 	var centerX = 0;
 	var centerY = 0;
 	var width = 5;
+	var id = 1;
+	
+	function newGridPlease() {
+		id++;
+		draw();
+	}
 	
 	function load () {
 	    makeTable();
@@ -47,6 +53,8 @@
 			map.appendChild(row);
 			for(j=0;j<=2*width;j++){
 				cell = document.createElement("td");
+				cell.setAttribute("onMouseOver","document.getElementById('"+i+":"+j+"').style.display='none'");
+				cell.setAttribute("onMouseOut","document.getElementById('"+i+":"+j+"').style.display=''");
 				div = document.createElement("div");
 				div.id = i+":"+j;
 				div.setAttribute("class","tile");
@@ -57,7 +65,7 @@
 	}
 	
 	function draw(){
-		$.getJSON("../controller/grid/1/window.json",
+		$.getJSON("../controller/grid/"+id+"/window.json",
 	  		  {	centerX : 	centerX,
 	  		    centerY : 	centerY,
 	  		    width	:	width
@@ -77,6 +85,13 @@
 			
 				document.getElementById(i+":"+j).innerHTML='';
 				document.getElementById(i+":"+j).appendChild(getElement(data.grid.places[i][j].type));
+				
+				for(k = 0; k < data.grid.places[i][j].objects.length; k++){
+						var obj = document.createElement("IMG");
+						obj.src = "../assets/objects/"+ data.grid.places[i][j].objects[k].type +".png";
+						obj.setAttribute("class","z1");
+						document.getElementById(i+":"+j).appendChild(obj);
+				}
 				//console.log(i+":"+j);
 			}
 		}
@@ -86,25 +101,33 @@
 		if(type == 'Sun'){
 			var Sun = document.createElement("IMG");
 			Sun.src = "../assets/tile-sun.png";
+			Sun.setAttribute("class","z0");
 			return Sun;
 		}
 		if(type == 'Planet'){
 			var Planet = document.createElement("IMG");
 			Planet.src = "../assets/tile-planet.png";
+			Planet.setAttribute("class","z0");
 			return Planet;
-		}
-		if(type == 'Ship'){
-			var ship = document.createElement("IMG");
-			ship.src = "../assets/tile-ship.png";
-			return ship;
 		}
 		if(type == 'EmptySpace'){
 			var EmptySpace = document.createElement("IMG");
 			EmptySpace.src = "../assets/tile-space.png";
+			EmptySpace.setAttribute("class","z0");
 			return EmptySpace;
 		}
-			
+		
 	}
+	
+	function explodeSomething(){
+		$.getJSON("../controller/grid/"+id+"/explode.json",
+	  		{	id : id
+	  		},
+			function(data) {
+			});
+		draw();
+	}
+	
 	</script>
 		                                                  
 	</head>                                                                 
@@ -141,5 +164,8 @@
 				</td>
 			</tr>
 		</table>
+		<button onClick="explodeSomething()">Explode Something!</button>
+		<button onClick="newGridPlease()">New Grid Please</button>
+		<button onClick="draw()">Refresh</button>
 	</body>                                                                 
 </html>
