@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.hons.honspace.solarsystem.Grid;
+import com.hons.honspace.solarsystem.GridMaker;
 
 @Component
 public class GridStorage {
@@ -29,6 +30,17 @@ public class GridStorage {
      */
     private GridStorage(){
         
+    }
+    
+    
+    public Grid getGridAndMakeIfNeed(int id){
+        Grid grid = getGrid(id);
+        if (grid == null){
+            grid = GridMaker.getIntance().makeGrid();
+            grid.setId(id);
+            storeGrid(grid);
+        }
+        return grid;
     }
     
     public Grid getGrid(int id) {

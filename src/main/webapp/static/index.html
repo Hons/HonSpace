@@ -6,17 +6,24 @@
 
 	var centerX = 0;
 	var centerY = 0;
-	var width = 5;
+	var width = 10;
 	var id = 1;
+	var currentData;
+	var currentCell;
+	var currentSelection;
+	var moving = null;
+	var objectsInGrid;
 	
 	function newGridPlease() {
 		id++;
 		draw();
+		updateSummary(5,5);
 	}
 	
 	function load () {
 	    makeTable();
 		draw();
+		getObjects();
 	}
 	
 	function moveY(val) {
@@ -27,6 +34,18 @@
 	function moveX(val) {
 		centerX+=val;
 		draw();
+	}
+
+	function lookAt(placeId) {
+		$.getJSON("../controller/grid/"+id+"/place/"+placeId+".json",
+		  {	
+		  },
+		  function(data) {
+			centerX=data.place.x;
+			centerY=data.place.y;
+			draw();
+		  });
+	
 	}
 	
 	function loadCustom (newCenterX,newCenterY,newWidth) {
@@ -53,13 +72,14 @@
 			map.appendChild(row);
 			for(j=0;j<=2*width;j++){
 				cell = document.createElement("td");
-				cell.setAttribute("onMouseOver","document.getElementById('"+i+":"+j+"').style.display='none'");
-				cell.setAttribute("onMouseOut","document.getElementById('"+i+":"+j+"').style.display=''");
+				cell.setAttribute("onMouseOver","document.getElementById('"+i+":"+j+"-outline"+"').style.display='block'");
+				cell.setAttribute("onMouseOut","document.getElementById('"+i+":"+j+"-outline"+"').style.display='none'");
+				cell.setAttribute("onClick","selectCell("+i+","+j+")");
 				div = document.createElement("div");
 				div.id = i+":"+j;
 				div.setAttribute("class","tile");
 				row.appendChild(cell);
-				cell.appendChild(div);				
+				cell.appendChild(div);
 			}
 		}
 	}
@@ -72,6 +92,7 @@
 	  		  },
 			  function(data) {
 			  //console.log(data);
+		  			currentData = data;
 					doodle(data);
 			  });
 	}
@@ -91,81 +112,224 @@
 						obj.src = "../assets/objects/"+ data.grid.places[i][j].objects[k].type +".png";
 						obj.setAttribute("class","z1");
 						document.getElementById(i+":"+j).appendChild(obj);
+						
 				}
+				
+				//Highlighty thing
+				var obj1 = document.createElement("IMG");
+				obj1.id = i+":"+j+"-outline";
+				obj1.src = "../assets/objects/Outline.png";
+				obj1.setAttribute("class","outline");
+				
+				document.getElementById(i+":"+j).appendChild(obj1);
+				
 				//console.log(i+":"+j);
 			}
 		}
 	}
 	
 	function getElement(type){
-		if(type == 'Sun'){
-			var Sun = document.createElement("IMG");
-			Sun.src = "../assets/tile-sun.png";
-			Sun.setAttribute("class","z0");
-			return Sun;
-		}
-		if(type == 'Planet'){
-			var Planet = document.createElement("IMG");
-			Planet.src = "../assets/tile-planet.png";
-			Planet.setAttribute("class","z0");
-			return Planet;
-		}
-		if(type == 'EmptySpace'){
-			var EmptySpace = document.createElement("IMG");
-			EmptySpace.src = "../assets/tile-space.png";
-			EmptySpace.setAttribute("class","z0");
-			return EmptySpace;
-		}
+		var tile = document.createElement("IMG");
+		tile.src = "../assets/tiles/"+type+".png";
+		tile.setAttribute("class","z0");
+		return tile;
 		
 	}
 	
-	function explodeSomething(){
-		$.getJSON("../controller/grid/"+id+"/explode.json",
-	  		{	id : id
+	function tick(){
+		$.getJSON("../controller/admin/tick.json",
+	  		{	
 	  		},
 			function(data) {
 			});
 		draw();
+		getObjects();
+	}
+	
+	function selectCell(i,j){
+		if(moving == null){
+			currentCell = currentData.grid.places[i][j];
+			updateSummary(i,j);
+		}else{
+			sendMoveRequest(moving,currentData.grid.places[i][j].x,currentData.grid.places[i][j].y);
+			moving=null;
+		}
+	}
+	
+	function sendMoveRequest(moving,i,j){
+		$.post("../controller/grid/"+id+"/ois/"+moving+"/move",
+	  		  {	
+  		  			destinationX	:	i,
+  		  			destinationY	:	j,
+  		  			
+	  		  },
+			  function(data) {
+			  		draw();
+			  });
+	}
+	
+	function sendJumpRequest(moving){
+		$.post("../controller/grid/"+id+"/ois/"+moving+"/jump",
+	  		  {	
+	  		  },
+			  function(data) {
+			  		draw();
+			  });
+	}
+	
+	
+	
+	function getObjects(){
+	$.getJSON("../controller/grid/"+id+"/ois.json",
+	  		{
+	  		},
+			function(data) {
+				objectsInGrid = data;
+			});
+	}
+	
+	function getObjectsOfType(type){
+		document.getElementById('item').innerHTML = '';
+		var text = '';
+		for(k = 0; k < objectsInGrid.objects.length; k++){
+			if(objectsInGrid.objects[k].type == type){
+				text += objectsInGrid.objects[k].type + "(" + objectsInGrid.objects[k].name + ")";
+				text += "<button onClick=\"showActions("+objectsInGrid.objects[k].id+")\">Actions</button>";
+				text += "<button onClick=\"lookAt("+objectsInGrid.objects[k].placeId+")\">Center</button>";
+				text += "<br>";
+			}
+		}
+		document.getElementById('item').innerHTML = text;
+	}
+	
+	function updateSummary(i,j){
+		document.getElementById('summary').innerHTML = '';
+		document.getElementById('actions').innerHTML = '';
+		
+		var text = "Location Summary: <br><br> "
+		text +=  "Coords: " + currentData.grid.places[i][j].x + "," +currentData.grid.places[i][j].y;
+		text += "<br><br>";
+		text += "Type: " + currentData.grid.places[i][j].type;
+		text += "<br><br>";
+		text += "Interactable:<br>";
+		
+		for(k = 0; k < currentData.grid.places[i][j].objects.length; k++){
+			text += currentData.grid.places[i][j].objects[k].type
+			text += " \""+currentData.grid.places[i][j].objects[k].name+"\"";
+			text += "<button onClick=\"showActions("+currentData.grid.places[i][j].objects[k].id+")\">Actions</button>";
+			text += "<br>";
+		}
+		
+		document.getElementById('summary').innerHTML = text;
+	}
+	
+	function showActions(oisId){
+		$.getJSON("../controller/grid/"+id+"/ois/"+oisId+".json",
+	  		  {	
+	  		  },
+			  function(data) {
+			  		currentSelection = data;
+					var text = data.ois.type
+					text += " \""+data.ois.name+"\" (" + data.ois.id + ")<br>" ;
+					if(data.ois.type == "Spaceship") {
+						text += "Actions:<br>"
+						if(data.ois.moved == false){
+							text += "Move (" + data.ois.moveDistance + "):";
+							text += " <button onClick=\"moveObject("+data.ois.id+","+data.ois.moveDistance+")\">Move</button> ";
+						} else {
+							text += "Already Moved";
+						}
+						text += "<br>";
+						if(data.ois.canJump == true){
+							text += "Jump: ";
+							text += " <button onClick=\"sendJumpRequest("+data.ois.id+")\">Jump</button> ";
+						} else {
+							text += "No Gate";
+						}
+						text += "<br>";
+					}
+					
+					document.getElementById('actions').innerHTML = text;
+			  });
+	}
+	
+	function moveObject(oid,distance){
+		//We should use this info to alter how the map appears
+		//i.e. highlight places the ship can move to.
+		//but for now we just record what's moving
+		moving = oid;
 	}
 	
 	</script>
 		                                                  
 	</head>                                                                 
 	<body onload="load()">
-		<table>
-			<tr>
-				<td>
-				</td>
-				<td class="centered" onClick=moveY(-1)>
-					<img class="arrow" src="../assets/arrows/up.png"/>
-				</td>
-				<td>
-				</td>
-			</tr>
-			<tr>
-				<td onClick=moveX(-1)>
-					<img class="arrow" src="../assets/arrows/left.png"/>
-				</td>
-				<td>
-					<table id="map">
-					</table>
-				</td>
-				<td onClick=moveX(1)>
-					<img class="arrow" src="../assets/arrows/right.png"/>
-				</td>
-			</tr>
-			<tr>
-				<td>
-				</td>
-				<td class="centered" onClick=moveY(1)>
-					<img class="arrow" src="../assets/arrows/down.png"/>
-				</td>
-				<td>
-				</td>
-			</tr>
-		</table>
-		<button onClick="explodeSomething()">Explode Something!</button>
-		<button onClick="newGridPlease()">New Grid Please</button>
-		<button onClick="draw()">Refresh</button>
+		<div class="mainscreen">
+			<table>
+				<tr>
+					<td>
+					</td>
+					<td class="centered" onClick=moveY(1)>
+						<img class="arrow" src="../assets/arrows/up.png"/>
+					</td>
+					<td>
+					</td>
+				</tr>
+				<tr>
+					<td onClick=moveX(-1)>
+						<img class="arrow" src="../assets/arrows/left.png"/>
+					</td>
+					<td>
+						<table id="map">
+						</table>
+					</td>
+					<td onClick=moveX(1)>
+						<img class="arrow" src="../assets/arrows/right.png"/>
+					</td>
+				</tr>
+				<tr>
+					<td>
+					</td>
+					<td class="centered" onClick=moveY(-1)>
+						<img class="arrow" src="../assets/arrows/down.png"/>
+					</td>
+					<td>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div id="controls" class="summary">
+			<div class="vspacer"></div>
+			<div class="otherButtons">
+				<button onClick="newGridPlease()">New Grid Please</button>
+				<button onClick="draw()">Refresh</button>
+				<button onClick="tick()">Tick</button>
+			</div>
+			<div class="vspacer"></div>
+			<div id="player">
+				Welcome to HonSpace! (Players Stuff here)				
+			</div>
+			<div class="vspacer"></div>
+			<div id="itemOptions">
+				Clickable Items
+				<br>
+				<button onClick="getObjectsOfType('Spaceship')">Ships</button>
+				<button onClick="getObjectsOfType('Gate')">Gates</button>
+				<button onClick="getObjectsOfType('SpaceStation')">SpaceStations</button>
+				<button onClick="getObjectsOfType('Asteroid')">Asteroids</button>
+			</div>
+			<div id="item">
+			 	The Alpha-y-est game ever! (Shipy Stuff here)			
+			</div>
+			<div class="vspacer"></div>
+			<div id="summary">
+			 	Baddumdum! (Summary here)
+			</div>
+			<div class="vspacer"></div>
+			<div id="actions">
+			 	Zum zum zum! (Action Stuff here)		
+			</div>
+		</div>
 	</body>                                                                 
 </html>

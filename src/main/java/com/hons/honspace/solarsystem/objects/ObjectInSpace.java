@@ -1,14 +1,16 @@
 package com.hons.honspace.solarsystem.objects;
 
-import com.hons.honspace.solarsystem.places.Place;
+import com.hons.honspace.util.IdGenerator;
 
 public abstract class ObjectInSpace {
-    private String name;
-    private Place location;
-    private String type = this.getClass().getSimpleName();
+    protected int id;
+    protected int gridId;
+    protected int placeId;
+    protected String name;
+    protected String type = this.getClass().getSimpleName();
     
-    public ObjectInSpace(Place loc) {
-        location = loc;
+    public ObjectInSpace() {
+        id = IdGenerator.getInstance().getNextId();
     }
 
     public String getName() {
@@ -25,6 +27,30 @@ public abstract class ObjectInSpace {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getGridId() {
+        return gridId;
+    }
+
+    public void setGridId(int gridId) {
+        this.gridId = gridId;
+    }
+
+    public int getPlaceId() {
+        return placeId;
+    }
+
+    public void setPlaceId(int placeId) {
+        this.placeId = placeId;
     }
     
 }

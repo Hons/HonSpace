@@ -27,6 +27,31 @@
 	z-index: 1;
 }
 
+.outline {
+	height: 50px;
+	width: 50px;
+	position: absolute;
+	z-index: 2;
+	display: none;
+}
+
+.summary {
+	float: left;
+	height: 600px;
+}
+
+.vspacer {
+	height: 100px;	
+}
+
+.mainscreen {
+	float: left;
+}
+
+.otherButtons {
+	clear: both;
+}
+
 img {
 	vertical-align: middle;
 	height: 100%;

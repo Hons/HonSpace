@@ -1,16 +1,19 @@
-package com.hons.honspace.solarsystem.places;
+package com.hons.honspace.command;
 
-import com.hons.honspace.util.IdGenerator;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract class Place {
+import com.hons.honspace.solarsystem.objects.ObjectInSpace;
+
+public class PlaceCommand {
     private int id;
     private int gridId;
     private int x;
     private int y;
-    private String type = this.getClass().getSimpleName();
+    private String type;
+    private List<ObjectInSpace> objects = new ArrayList<>();
     
-    public Place() {
-        id = IdGenerator.getInstance().getNextId();
+    public PlaceCommand() {
     }
     
     public int getX() {
@@ -47,5 +50,16 @@ public abstract class Place {
     public void setGridId(int gridId) {
         this.gridId = gridId;
     }
+
+    public List<ObjectInSpace> getObjects() {
+        return objects;
+    }
+
+    public void setObjects(List<ObjectInSpace> objects) {
+        this.objects = objects;
+    }
     
+    public void addObject(ObjectInSpace ois){
+        objects.add(ois);
+    }
 }
